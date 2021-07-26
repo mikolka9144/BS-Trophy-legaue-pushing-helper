@@ -12,7 +12,5 @@ class InfoError(Exception):
         self.infoType = infoType
         if infoType is InfoErrorType.SCRAPPING_ERROR:
             self.message = "Couldn't scrap response from brawlify. Did you entered ID correctly?"
-        elif infoType is InfoErrorType.MISSING_TIER:
-            self.message = "Trophy tier for {trophies} trophies wasn't implemented".format(**kwargs)
         elif infoType is InfoErrorType.BRAWLIFY_CONNECTION_FAILED:
             self.message = "Couldn't connect brawlify. Check internet connection."

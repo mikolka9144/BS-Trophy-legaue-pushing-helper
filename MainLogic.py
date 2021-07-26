@@ -25,20 +25,25 @@ class BrawlStarsCalculator:
     def Get_brawlers_starpoints_rewards_report(self):
         report = BrawlersStarpointsReport()
         for brawler in self.API.get_trophy_legaue_affected():
-            trophy_range = self.API.get_trophy_range(brawler.trophies)
-            if trophy_range is None:
-                raise InfoError(InfoErrorType.MISSING_TIER,trophies=brawler.trophies)
-            report.brawlers_reports.append(
-                BrawlerReport(
-                    brawler,
-                    trophy_range.star_points,
-                    brawler.trophies - trophy_range.trophies_decay,
-                    self._Get_status(trophy_range, brawler),
-                )
-            )
+            report.brawlers_reports.append(self.generate_brawler_report(brawler))
         report.brawlers_reports.sort(key=self._trophy_loss_sort, reverse=True)
         return report
-
+    def generate_brawler_report(self,brawler):
+        trophy_range = self.API.get_trophy_range(brawler.trophies)
+        if trophy_range is None:
+            return BrawlerReport(
+                brawler,
+                0,
+                0,
+                Brawler_Status.NOT_CLASSYFIED,
+            )
+        else:
+            return BrawlerReport(
+                brawler,
+                trophy_range.star_points,
+                brawler.trophies - trophy_range.trophies_decay,
+                self._Get_status(trophy_range, brawler),
+            )
 
 class BrawlersStarpointsReport:
     def __init__(self):
@@ -64,6 +69,7 @@ class Brawler_Status(Enum):
     I_WIN_AWAY = 1
     II_WINS_AWAY = 2
     OUT_OF_LEAGUE = 3
+    NOT_CLASSYFIED = 4
 
 
 @dataclass
@@ -72,3 +78,6 @@ class BrawlerReport:
     starpoints_reward: int
     trophy_loss: int
     status: Brawler_Status
+    @property
+    def trophy_loss_graph(self):
+        return f'{self.brawler.trophies}->{self.brawler.trophies-self.trophy_loss}'
